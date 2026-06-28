@@ -66,3 +66,9 @@ export async function deleteWatch(id: string): Promise<void> {
   const { error } = await supabase.from(TABLE).delete().eq('id', id);
   if (error) throw error;
 }
+
+/** Asigna / cambia la ubicación (vendedor) de un reloj. */
+export async function setWatchUbicacion(id: string, ubicacion: string | null): Promise<void> {
+  const { error } = await supabase.from(TABLE).update({ ubicacion }).eq('id', id);
+  if (error) throw error;
+}

@@ -15,7 +15,8 @@ create table if not exists public.relojes (
   precio_mayorista numeric not null default 0,
   estado           text    not null default 'disponible'
                      check (estado in ('disponible', 'vendido')),
-  fotos            text[]  not null default '{}'
+  fotos            text[]  not null default '{}',
+  ubicacion        text    -- Ubicación / vendedor (privado, solo admin)
 );
 
 create index if not exists relojes_created_at_idx on public.relojes (created_at desc);

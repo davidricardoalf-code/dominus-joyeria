@@ -11,8 +11,10 @@ export interface Watch {
   precio_mayorista: number;
   estado: WatchStatus;
   fotos: string[];
+  ubicacion: string | null; // Ubicación / vendedor (privado, solo admin)
 }
 
 export type WatchInput = Omit<Watch, 'id' | 'created_at'>;
 
-export type PdfVariant = 'mayorista' | 'cliente_mayorista' | 'cliente_directo';
+// Catálogos globales (todos los relojes disponibles en un solo PDF)
+export type CatalogVariant = 'mayorista' | 'catalogo' | 'cliente';

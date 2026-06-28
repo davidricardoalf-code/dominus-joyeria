@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Watch } from '@/types/watch';
 import { getWatches } from '@/lib/supabase';
 import Header from '@/components/Header';
@@ -12,6 +12,15 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
+
+  // Lista de ubicaciones únicas ya usadas (para los menús desplegables)
+  const ubicaciones = useMemo(() => {
+    const set = new Set<string>();
+    for (const w of watches) {
+      if (w.ubicacion) set.add(w.ubicacion);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'es'));
+  }, [watches]);
 
   useEffect(() => {
     let mounted = true;
@@ -59,10 +68,20 @@ export default function Home() {
           </div>
         </div>
       ) : (
-        <InventoryTable watches={watches} onChange={handleChange} onRemove={handleRemove} />
+        <InventoryTable
+          watches={watches}
+          ubicaciones={ubicaciones}
+          onChange={handleChange}
+          onRemove={handleRemove}
+        />
       )}
 
-      <WatchForm open={formOpen} onClose={() => setFormOpen(false)} onCreated={handleCreated} />
+      <WatchForm
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        onCreated={handleCreated}
+        ubicaciones={ubicaciones}
+      />
 
       <footer className="border-t border-dominus-line py-8 text-center">
         <p className="text-[11px] uppercase tracking-widest2 text-dominus-muted">Dominus Joyería</p>

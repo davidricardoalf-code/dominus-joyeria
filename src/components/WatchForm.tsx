@@ -10,6 +10,7 @@ import Button from './ui/Button';
 import Field, { labelCls, inputCls } from './ui/Field';
 
 const MAX_FOTOS = 3;
+const NUEVA = '__nueva__';
 
 interface LocalPhoto {
   file: File; // ya comprimido a JPG
@@ -20,10 +21,12 @@ export default function WatchForm({
   open,
   onClose,
   onCreated,
+  ubicaciones,
 }: {
   open: boolean;
   onClose: () => void;
   onCreated: (watch: Watch) => void;
+  ubicaciones: string[];
 }) {
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [marca, setMarca] = useState('');
@@ -33,6 +36,8 @@ export default function WatchForm({
   const [precioCliente, setPrecioCliente] = useState('');
   const [precioMayorista, setPrecioMayorista] = useState('');
   const [estado, setEstado] = useState<WatchStatus>('disponible');
+  const [ubicacion, setUbicacion] = useState<string>('');
+  const [nuevaUbic, setNuevaUbic] = useState('');
 
   const [busy, setBusy] = useState(false);
   const [compressing, setCompressing] = useState(false);
@@ -56,6 +61,8 @@ export default function WatchForm({
     setPrecioCliente('');
     setPrecioMayorista('');
     setEstado('disponible');
+    setUbicacion('');
+    setNuevaUbic('');
     setError(null);
   }
 
@@ -99,6 +106,9 @@ export default function WatchForm({
         urls.push(await uploadFoto(p.file));
       }
 
+      const ubicacionFinal =
+        ubicacion === NUEVA ? nuevaUbic.trim() || null : ubicacion.trim() || null;
+
       const watch = await createWatch({
         marca: marca.trim(),
         milimetros: milimetros.trim(),
@@ -108,6 +118,7 @@ export default function WatchForm({
         precio_mayorista: Number(precioMayorista) || 0,
         estado,
         fotos: urls,
+        ubicacion: ubicacionFinal,
       });
 
       onCreated(watch);
@@ -259,6 +270,37 @@ export default function WatchForm({
               <option value="disponible">Disponible</option>
               <option value="vendido">Vendido</option>
             </select>
+          </div>
+
+          {/* Ubicación / Vendedor (privado) */}
+          <div>
+            <span className={labelCls}>
+              Ubicación / Vendedor <span className="text-dominus-muted">(privado)</span>
+            </span>
+            <select
+              value={ubicacion}
+              onChange={(e) => setUbicacion(e.target.value)}
+              className={inputCls}
+            >
+              <option value="">Sin ubicación</option>
+              {ubicaciones.map((u) => (
+                <option key={u} value={u}>
+                  {u}
+                </option>
+              ))}
+              <option value={NUEVA}>➕ Nueva ubicación…</option>
+            </select>
+            {ubicacion === NUEVA && (
+              <input
+                value={nuevaUbic}
+                onChange={(e) => setNuevaUbic(e.target.value)}
+                placeholder="Ej: Bodega, Tienda Surf Coco, Barbería Filadelfia"
+                className={`${inputCls} mt-2`}
+              />
+            )}
+            <p className="mt-1 text-xs text-dominus-muted">
+              Solo tú la ves. No aparece en PDFs ni en WhatsApp.
+            </p>
           </div>
 
           {error && (

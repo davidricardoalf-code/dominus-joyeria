@@ -57,10 +57,28 @@ Abre http://localhost:3000
 
 ## 5. Desplegar en Vercel
 
-1. Sube el repo a GitHub.
-2. En Vercel → **New Project** → importa el repo.
-3. En **Settings → Environment Variables**, agrega las mismas variables de `.env.local`.
-4. Deploy.
+> ⚠️ **No uses el "Vercel Drop" del navegador (arrastrar y soltar).** Pierde archivos
+> de carpetas anidadas (deja fuera `src/app`) y el build falla con
+> *"Couldn't find any 'pages' or 'app' directory"*. Usa GitHub o la CLI.
+
+### Opción A — GitHub (recomendada)
+
+1. Descomprime el ZIP.
+2. Sube TODA la carpeta a un repo de GitHub.
+3. En Vercel → **New Project** → importa el repo (detecta Next.js solo).
+4. En **Settings → Environment Variables**, agrega las mismas variables de `.env.local`.
+5. Deploy.
+
+### Opción B — Vercel CLI
+
+```bash
+npm i -g vercel
+cd dominus-inventario
+vercel          # vista previa
+vercel --prod   # producción
+```
+
+La CLI sube la carpeta completa respetando la estructura.
 
 ---
 

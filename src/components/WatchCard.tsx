@@ -4,11 +4,13 @@ import { useState } from 'react';
 import type { Watch } from '@/types/watch';
 import { precioCosto } from '@/lib/pricing';
 import { formatPrice } from '@/lib/format';
-import { generateWatchPdf } from '@/lib/pdf';
 import { shareWatch } from '@/lib/shareCard';
-import { setWatchStatus, deleteWatch } from '@/lib/supabase';
+import { setWatchStatus, deleteWatch, setWatchUbicacion } from '@/lib/supabase';
 import Button from './ui/Button';
 import StatusBadge from './ui/StatusBadge';
+
+const NUEVA = '__nueva__';
+const SIN = '__sin__';
 
 function PriceLine({ label, value, gold }: { label: string; value: number; gold?: boolean }) {
   return (
@@ -21,10 +23,12 @@ function PriceLine({ label, value, gold }: { label: string; value: number; gold?
 
 export default function WatchCard({
   watch,
+  ubicaciones,
   onChange,
   onRemove,
 }: {
   watch: Watch;
+  ubicaciones: string[];
   onChange: (w: Watch) => void;
   onRemove: (id: string) => void;
 }) {
@@ -55,7 +59,29 @@ export default function WatchCard({
     onRemove(watch.id);
   }
 
+  async function cambiarUbicacion(value: string) {
+    let nueva: string | null;
+    if (value === SIN) {
+      nueva = null;
+    } else if (value === NUEVA) {
+      // eslint-disable-next-line no-alert
+      const nombre = prompt('Nueva ubicación / vendedor:')?.trim();
+      if (!nombre) return;
+      nueva = nombre;
+    } else {
+      nueva = value;
+    }
+    await run('ubic', async () => {
+      await setWatchUbicacion(watch.id, nueva);
+      onChange({ ...watch, ubicacion: nueva });
+    });
+  }
+
   const foto = watch.fotos?.[0];
+  // Lista de opciones del selector (incluye la actual aunque no esté en la lista global)
+  const opciones = Array.from(
+    new Set([...(watch.ubicacion ? [watch.ubicacion] : []), ...ubicaciones])
+  );
 
   return (
     <article className="flex flex-col overflow-hidden rounded-md border border-dominus-line bg-dominus-surface">
@@ -97,35 +123,25 @@ export default function WatchCard({
           <PriceLine label="Mayorista" value={watch.precio_mayorista} />
         </div>
 
-        {/* PDFs */}
+        {/* Ubicación (PRIVADA - solo admin) */}
         <div>
-          <p className="mb-2 text-[11px] uppercase tracking-widest2 text-dominus-gold">PDF</p>
-          <div className="grid grid-cols-3 gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={busy !== null}
-              onClick={() => run('pdfA', () => generateWatchPdf(watch, 'mayorista'))}
-            >
-              Mayorista
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={busy !== null}
-              onClick={() => run('pdfB', () => generateWatchPdf(watch, 'cliente_mayorista'))}
-            >
-              Catálogo
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={busy !== null}
-              onClick={() => run('pdfC', () => generateWatchPdf(watch, 'cliente_directo'))}
-            >
-              Cliente
-            </Button>
-          </div>
+          <p className="mb-1.5 text-[11px] uppercase tracking-widest2 text-dominus-gold">
+            📍 Ubicación <span className="text-dominus-muted">(privado)</span>
+          </p>
+          <select
+            value={watch.ubicacion ?? SIN}
+            disabled={busy !== null}
+            onChange={(e) => cambiarUbicacion(e.target.value)}
+            className="h-9 w-full rounded-sm border border-dominus-line bg-black px-2 text-sm text-white focus:border-dominus-gold focus:outline-none"
+          >
+            <option value={SIN}>Sin ubicación</option>
+            {opciones.map((u) => (
+              <option key={u} value={u}>
+                {u}
+              </option>
+            ))}
+            <option value={NUEVA}>➕ Otra…</option>
+          </select>
         </div>
 
         {/* Acciones */}

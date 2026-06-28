@@ -13,8 +13,8 @@
     "browser-image-compression": "^2.0.2",
     "jspdf": "^2.5.2",
     "next": "15.1.11",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
